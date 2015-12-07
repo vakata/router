@@ -41,7 +41,10 @@ class Router
                 }
                 $matches[2] = explode(':', $matches[2], 2);
                 if (count($matches[2]) === 1) {
-                    $matches[2] = in_array($matches[2][0], ['a', 'i', 'h', '*', '**']) || !preg_match('(^[a-z]+$)', $matches[2][0]) ?
+                    $matches[2] = (
+                        in_array($matches[2][0], ['a', 'i', 'h', '*', '**']) ||
+                        !preg_match('(^[a-z]+$)', $matches[2][0])
+                    ) ?
                         [$matches[2][0], ''] :
                         ['*', $matches[2][0]];
                 }
@@ -198,7 +201,7 @@ class Router
         if (isset($this->routes[$verb])) {
             foreach ($this->routes[$verb] as $route => $handler) {
                 if (preg_match($this->compile($route), $request, $matches)) {
-                    $arg = explode('/',trim($request, '/'));
+                    $arg = explode('/', trim($request, '/'));
                     foreach ($matches as $k => $v) {
                         if (!is_int($k)) {
                             $arg[$k] = trim($v, '/');
