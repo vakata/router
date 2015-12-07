@@ -1,5 +1,6 @@
 <?php
-namespace vakata\route;
+
+namespace vakata\router;
 
 class RouterException extends \Exception
 {
