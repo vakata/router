@@ -55,6 +55,10 @@ $router
         ->get('view', function () { /* 1 will be echoed */ })
         ->post('chat', function () { /* 1 will be echoed */ });
 
+// there is no need to chain the method calls - this works too:
+$router->post('123', function () { });
+$router->post('456', function () { });
+
 // you finally run the router
 try {
     $router->run($_SERVER['REQUEST_URI'], $_SERVER['REQUEST_METHOD']);
