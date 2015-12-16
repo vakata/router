@@ -2,6 +2,9 @@
 
 namespace vakata\router;
 
+/**
+ * A minimal routing class.
+ */
 class Router
 {
     protected $preprocessors = [];
@@ -85,6 +88,13 @@ class Router
         return $url;
     }
 
+    /**
+     * Define a prefix for all routes added from now on. Optionally define a callback to execute if the request matches the prefix.
+     * @method with
+     * @param  string        $prefix  the prefix
+     * @param  callable|null $handler the callback to execute if the request matches the prefix
+     * @return self
+     */
     public function with($prefix = '', callable $handler = null)
     {
         $prefix = trim($prefix, '/');
@@ -97,6 +107,14 @@ class Router
         }
         return $this;
     }
+    /**
+     * Add a route. All params are optional and each of them can be omitted independently.
+     * @method add
+     * @param  array|string $method  HTTP verbs for which this route is valid
+     * @param  string       $url     the route URL (check the usage docs for information on supported formats)
+     * @param  callable     $handler the handler to execute when the route is matched
+     * @return self
+     */
     public function add($method, $url = null, $handler = null)
     {
         $args = func_get_args();
@@ -139,43 +157,110 @@ class Router
 
         return $this;
     }
+    /**
+     * Shortcut for add('GET', $url, $handler)
+     * @method get
+     * @param  string   $url
+     * @param  callable $handler
+     * @return self
+     */
     public function get($url, callable $handler)
     {
         return $this->add('GET', $url, $handler);
     }
+    /**
+     * Shortcut for add('REPORT', $url, $handler)
+     * @method report
+     * @param  string   $url
+     * @param  callable $handler
+     * @return self
+     */
     public function report($url, callable $handler)
     {
         return $this->add('REPORT', $url, $handler);
     }
+    /**
+     * Shortcut for add('POST', $url, $handler)
+     * @method post
+     * @param  string   $url
+     * @param  callable $handler
+     * @return self
+     */
     public function post($url, callable $handler)
     {
         return $this->add('POST', $url, $handler);
     }
+    /**
+     * Shortcut for add('HEAD', $url, $handler)
+     * @method head
+     * @param  string   $url
+     * @param  callable $handler
+     * @return self
+     */
     public function head($url, callable $handler)
     {
         return $this->add('HEAD', $url, $handler);
     }
+    /**
+     * Shortcut for add('PUT', $url, $handler)
+     * @method put
+     * @param  string   $url
+     * @param  callable $handler
+     * @return self
+     */
     public function put($url, callable $handler)
     {
         return $this->add('PUT', $url, $handler);
     }
+    /**
+     * Shortcut for add('PATCH', $url, $handler)
+     * @method patch
+     * @param  string   $url
+     * @param  callable $handler
+     * @return self
+     */
     public function patch($url, callable $handler)
     {
         return $this->add('PATCH', $url, $handler);
     }
+    /**
+     * Shortcut for add('DELETE', $url, $handler)
+     * @method delete
+     * @param  string   $url
+     * @param  callable $handler
+     * @return self
+     */
     public function delete($url, callable $handler)
     {
         return $this->add('DELETE', $url, $handler);
     }
+    /**
+     * Shortcut for add('OPTIONS', $url, $handler)
+     * @method options
+     * @param  string   $url
+     * @param  callable $handler
+     * @return self
+     */
     public function options($url, callable $handler)
     {
         return $this->add('OPTIONS', $url, $handler);
     }
+    /**
+     * Are there any routes registered in the instances
+     * @method isEmpty
+     * @return boolean `true` if there are no routes registered
+     */
     public function isEmpty()
     {
         return count($this->routes) === 0;
     }
-
+    /**
+     * Runs the router with the specified input, invokes the registered callbacks (if a match is found)
+     * @method run
+     * @param  string $request the path to check
+     * @param  string $verb    the HTTP verb to check (defaults to GET)
+     * @return mixed           if a match is found the result of the callback is returned
+     */
     public function run($request, $verb = 'GET')
     {
         if ($this->isEmpty()) {
