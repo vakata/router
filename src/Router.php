@@ -10,6 +10,24 @@ class Router
     protected $preprocessors = [];
     protected $routes = [];
     protected $prefix = '';
+    protected $base = '';
+
+    /**
+     * Create an instance.
+     * You can specify the optional base parameter, that will be stripped if found at the begining of any URL.
+     * If you set $base to `true` the router will try to autodetect its base.
+     * @method __construct
+     * @param  string|boolean      $base optional parameter indicating a common part of all the URLs that will be run
+     */
+    public function __construct($base = '')
+    {
+        if ($base === true) {
+            $this->base = trim(str_replace('\\', '/', dirname($_SERVER['PHP_SELF'])), '/');
+        }
+        else {
+            $this->base = urldecode(trim((string)parse_url($base, PHP_URL_PATH), '/'));
+        }
+    }
 
     protected function compile($url, $full = true)
     {
@@ -20,9 +38,9 @@ class Router
             }
         );
         if (!count($url)) {
-            return $full ? '(^/+$)ui' : '(^/+)ui';
+            return $full ? '(^/+$)u' : '(^/+)u';
         }
-        $url = '(^/'.implode('', array_map([$this, 'compileSegment'], $url)).($full ? '$' : '').')';
+        $url = '(^/'.implode('', array_map([$this, 'compileSegment'], $url)).($full ? '$' : '').')u';
         if (@preg_match($url, '') === false) {
             throw new RouterException('Could not compile route regex');
         }
@@ -33,7 +51,7 @@ class Router
     {
         $all = preg_match('(^\{[^\}]+\}$)', $url);
         if (!preg_match('(([^{]*)\{([^}]+)\}([^{]*))i', $url)) {
-            return '('.preg_quote($url).')/';
+            return '(?:'.preg_quote($url).')/';
         }
         $url = preg_replace_callback(
             '(([^{]*)\{([^}]+)\}([^{]*))i',
@@ -73,11 +91,11 @@ class Router
                         $regex = $regex;
                         break;
                 }
-                $regex = '('.(strlen($group) ? '?P<'.preg_quote($group).'>' : '').$regex.')';
+                $regex = '('.(strlen($group) ? '?P<'.preg_quote($group).'>' : '?:').$regex.')';
                 if (!$all) {
                     $regex = $optional ? $regex.'?' : $regex;
                 } else {
-                    $regex = $optional ? '('.$regex.'/)?' : $regex.'/';
+                    $regex = $optional ? '(?:'.$regex.'/)?' : $regex.'/';
                 }
 
                 return preg_quote($matches[1]).$regex.preg_quote($matches[3]);
@@ -266,7 +284,11 @@ class Router
         if ($this->isEmpty()) {
             throw new RouterException('No valid routes');
         }
-        $request = str_replace('//', '/', '/'.urldecode(trim($request, '/')).'/');
+        $request = urldecode(trim($request, '/'));
+        if ($this->base && strpos($request, $this->base) === 0) {
+            $request = substr($request, strlen($this->base));
+        }
+        $request = str_replace('//', '/', '/'.$request.'/');
         $matches = [];
         foreach ($this->preprocessors as $route => $handlers) {
             if (preg_match($this->compile($route, false), $request, $matches)) {

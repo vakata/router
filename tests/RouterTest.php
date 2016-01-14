@@ -15,7 +15,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase
 	}
 
 	public function testCreate() {
-		self::$router = new \vakata\router\Router($data);
+		self::$router = new \vakata\router\Router();
 		$this->assertEquals(true, self::$router->isEmpty());
 		self::$router
 			->get('/get', function () { return 1; })
@@ -80,5 +80,18 @@ class RouterTest extends \PHPUnit_Framework_TestCase
 	public function testInvalid() {
 		$this->setExpectedException('\vakata\router\RouterException');
 		self::$router->run('regex/qwer');
+	}
+	public function testBase() {
+		$router1 = new \vakata\router\Router('/asdf/');
+		$router2 = new \vakata\router\Router();
+		$router1->get('test', function () { return 1; });
+		$router2->get('test', function () { return 1; });
+		$this->assertEquals(1, $router1->run('asdf/test'));
+		try {
+			$router2->run('asdf/test');
+			$this->assertEquals(true, false);
+		} catch (\vakata\router\RouterException $e) {
+			$this->assertEquals(true, true);
+		}
 	}
 }
