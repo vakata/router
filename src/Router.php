@@ -23,8 +23,7 @@ class Router
     {
         if ($base === true) {
             $this->base = trim(str_replace('\\', '/', dirname($_SERVER['PHP_SELF'])), '/');
-        }
-        else {
+        } else {
             $this->base = urldecode(trim((string)parse_url($base, PHP_URL_PATH), '/'));
         }
     }
@@ -107,7 +106,9 @@ class Router
     }
 
     /**
-     * Define a prefix for all routes added from now on. Optionally define a callback to execute if the request matches the prefix.
+     * Define a prefix for all routes added from now on.
+     * 
+     * If is also possible to define an optional callback to execute if the request matches the prefix.
      * @method with
      * @param  string        $prefix  the prefix
      * @param  callable|null $handler the callback to execute if the request matches the prefix
@@ -293,6 +294,7 @@ class Router
         foreach ($this->preprocessors as $route => $handlers) {
             if (preg_match($this->compile($route, false), $request, $matches)) {
                 $arg = explode('/', trim($request, '/'));
+                $arg[-1] = '/' . $this->base . '/';
                 foreach ($matches as $k => $v) {
                     if (!is_int($k)) {
                         $arg[$k] = trim($v, '/');
