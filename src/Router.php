@@ -107,7 +107,7 @@ class Router
 
     /**
      * Define a prefix for all routes added from now on.
-     * 
+     *
      * If is also possible to define an optional callback to execute if the request matches the prefix.
      * @method with
      * @param  string        $prefix  the prefix
