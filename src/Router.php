@@ -274,6 +274,54 @@ class Router
         return count($this->routes) === 0;
     }
     /**
+     * return the base part of the URL (that is not evaluated by the router)
+     * @method base
+     * @return string the base URL
+     */
+    public function base()
+    {
+        return '/' . $this->base . '/';
+    }
+    /**
+     * convert a router-relative path to a server absolute path
+     * @method url
+     * @param  string $path   the path to convert (defaults to an empty string)
+     * @param  array  $params optional GET parameters to append
+     * @return string         the server path
+     */
+    public function url($path = '', $params = [])
+    {
+        $path = $this->base() . ltrim($path, '/');
+        if (count($params)) {
+            $path .= '?' . http_build_query($data);
+        }
+        return $path;
+    }
+    /**
+     * check if a URL would be matched by any routes in the router
+     * @method exists
+     * @param  string $request the URL to check
+     * @param  string $method  for which method to check (defaults to "GET")
+     * @return boolean         would the URL match if it is ran
+     */
+    public function exists($request, $method = 'GET') {
+        $request = urldecode(trim(parse_url($request, PHP_URL_PATH), '/'));
+        if ($this->base && strpos($request, $this->base) === 0) {
+            $request = substr($request, strlen($this->base));
+        }
+        $request = str_replace('//', '/', '/'.$request.'/');
+
+        if (!isset($this->routes[$verb])) {
+            return false;
+        }
+        foreach ($this->routes[$verb] as $route => $handler) {
+            if (preg_match($this->compile($route), $request)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    /**
      * Runs the router with the specified input, invokes the registered callbacks (if a match is found)
      * @method run
      * @param  string $request the path to check
@@ -283,7 +331,7 @@ class Router
     public function run($request, $verb = 'GET')
     {
         if ($this->isEmpty()) {
-            throw new RouterException('No valid routes');
+            throw new RouterNotFoundException('No valid routes', 500);
         }
         $request = urldecode(trim($request, '/'));
         if ($this->base && strpos($request, $this->base) === 0) {
@@ -294,7 +342,7 @@ class Router
         foreach ($this->preprocessors as $route => $handlers) {
             if (preg_match($this->compile($route, false), $request, $matches)) {
                 $arg = explode('/', trim($request, '/'));
-                $arg[-1] = '/' . $this->base . '/';
+                $arg[-1] = $this->base();
                 foreach ($matches as $k => $v) {
                     if (!is_int($k)) {
                         $arg[$k] = trim($v, '/');
@@ -311,6 +359,7 @@ class Router
             foreach ($this->routes[$verb] as $route => $handler) {
                 if (preg_match($this->compile($route), $request, $matches)) {
                     $arg = explode('/', trim($request, '/'));
+                    $arg[-1] = $this->base();
                     foreach ($matches as $k => $v) {
                         if (!is_int($k)) {
                             $arg[$k] = trim($v, '/');
@@ -321,6 +370,6 @@ class Router
                 }
             }
         }
-        throw new RouterException('No matching route found', 404);
+        throw new RouterNotFoundException('No matching route found', 404);
     }
 }
