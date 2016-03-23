@@ -293,7 +293,7 @@ class Router
     {
         $path = $this->base() . ltrim($path, '/');
         if (count($params)) {
-            $path .= '?' . http_build_query($data);
+            $path .= '?' . http_build_query($params);
         }
         return $path;
     }
