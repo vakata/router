@@ -126,6 +126,22 @@ class Router
         }
         return $this;
     }
+
+    /**
+     * Group a few routes together (when sharing a common prefix)
+     * @method group
+     * @param  string   $prefix  the common prefix
+     * @param  callable $handler a function to add the actual routes from, receives the router object as parameter
+     * @return self
+     */
+    public function group($prefix, callable $handler) {
+        $prefix = trim($prefix, '/');
+        $this->prefix = $prefix.(strlen($prefix) ? '/' : '');
+        $handler($this);
+        $this->prefix = '';
+        return $this;
+    }
+
     /**
      * Add a route. All params are optional and each of them can be omitted independently.
      * @method add

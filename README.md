@@ -24,32 +24,32 @@ $router = new \vakata\router\Router();
 $router
     ->get('/', function () { echo 'homepage'; })
     ->get('/profile', function () { echo 'user profile'; })
-    ->with('/books/') // specify a prefix for all future routes
-        ->get('read/{i:id}', function ($matches) {
-            // this method uses a named placeholder
-            // provided the user visits /books/read/10 matches will contain:
-            var_dump($matches); // 0 => books, 1 => read, 2 => 10, id => 10
-            // placeholders are wrapped in curly braces {...} and can be: 
-            //  - i - an integer
-            //  - a - any letter (a-z)
-            //  - h - any letter or integer
-            //  - * - anything (up to the next slash (/))
-            //  - ** - anything (to the end of the URL)
+    ->group('/books/', function ($router) { // specify a prefix
+        $router
+            ->get('read/{i:id}', function ($matches) {
+                // this method uses a named placeholder
+                // when visiting /books/read/10 matches will contain:
+                var_dump($matches); // 0 => books, 1 => read, 2 => 10, id => 10
+                // placeholders are wrapped in curly braces {...} and can be: 
+                //  - i - an integer
+                //  - a - any letter (a-z)
+                //  - h - any letter or integer
+                //  - * - anything (up to the next slash (/))
+                //  - ** - anything (to the end of the URL)
 
-            // placeholders can be named too by using the syntax:
-            // {placeholder:name}
-            
-            // placeholders can also be optional
-            // {?optional}
-        })
-        // for advanced users - you can use any regex as a placeholder:
-        ->get('{(delete|update):action}/{(\d+):id}', function ($matches) { })
-        // you can also use any HTTP verb
-        ->post('delete/{i:id}', function ($matches) { })
-    // here is how you reset the prefix
-    ->with('')
-        // you can also bind multiple HTTP verbs in one go
-        ->add(['GET', 'HEAD'], '/path', function () { })
+                // placeholders can be named too by using the syntax:
+                // {placeholder:name}
+                
+                // placeholders can also be optional
+                // {?optional}
+            })
+            // for advanced users - you can use any regex as a placeholder:
+            ->get('{(delete|update):action}/{(\d+):id}', function ($matches) { })
+            // you can also use any HTTP verb
+            ->post('delete/{i:id}', function ($matches) { })
+    })
+    // you can also bind multiple HTTP verbs in one go
+    ->add(['GET', 'HEAD'], '/path', function () { })
     // you can also use with() statements to execute some code if the begging of the URL is a match to the prefix
     ->with('user', function () { echo 1; })
         ->get('view', function () { /* 1 will be echoed */ })
@@ -61,8 +61,11 @@ $router->post('456', function () { });
 
 // you finally run the router
 try {
-    $router->run($_SERVER['REQUEST_URI'], $_SERVER['REQUEST_METHOD']);
-} catch (\vakata\router\RouterException $e) {
+    $router->run(
+        parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH),
+        $_SERVER['REQUEST_METHOD']
+    );
+} catch (\vakata\router\RouterNotFoundException $e) {
     // thrown if no matching route is found
 }
 ```

@@ -94,4 +94,20 @@ class RouterTest extends \PHPUnit_Framework_TestCase
 			$this->assertEquals(true, true);
 		}
 	}
+	public function testGroup() {
+		$router = new \vakata\router\Router();
+		$router->group('prefix', function ($router) {
+			$router->get('a', function () { return 1; });
+		});
+		$this->assertEquals(1, $router->run('prefix/a'));
+
+		$router1 = new \vakata\router\Router();
+		$router1->group('prefix', function () use ($router1) {
+			$router1->get('b', function () { return 1; });
+		});
+		$this->assertEquals(1, $router1->run('prefix/b'));
+
+		$this->setExpectedException('\vakata\router\RouterException');
+		$router1->run('prefix/a');
+	}
 }
