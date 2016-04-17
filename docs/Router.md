@@ -6,7 +6,6 @@ A minimal routing class.
 | Name | Description |
 |------|-------------|
 |[__construct](#vakata\router\router__construct)|Create an instance.|
-|[with](#vakata\router\routerwith)|Define a prefix for all routes added from now on.|
 |[group](#vakata\router\routergroup)|Group a few routes together (when sharing a common prefix)|
 |[add](#vakata\router\routeradd)|Add a route. All params are optional and each of them can be omitted independently.|
 |[get](#vakata\router\routerget)|Shortcut for add('GET', $url, $handler)|
@@ -21,6 +20,9 @@ A minimal routing class.
 |[base](#vakata\router\routerbase)|return the base part of the URL (that is not evaluated by the router)|
 |[url](#vakata\router\routerurl)|convert a router-relative path to a server absolute path|
 |[exists](#vakata\router\routerexists)|check if a URL would be matched by any routes in the router|
+|[path](#vakata\router\routerpath)|Return the path of a given request with the base stripped off.|
+|[segments](#vakata\router\routersegments)|Get all the relevant segments from a path string.|
+|[segment](#vakata\router\routersegment)|Get a relevant path segment by index.|
 |[run](#vakata\router\routerrun)|Runs the router with the specified input, invokes the registered callbacks (if a match is found)|
 
 ---
@@ -41,27 +43,6 @@ public function __construct (
 |  | Type | Description |
 |-----|-----|-----|
 | `$base` | `string`, `boolean` | optional parameter indicating a common part of all the URLs that will be run |
-
----
-
-
-### vakata\router\Router::with
-Define a prefix for all routes added from now on.  
-If is also possible to define an optional callback to execute if the request matches the prefix.
-
-```php
-public function with (  
-    string $prefix,  
-    callable|null $handler  
-) : self    
-```
-
-|  | Type | Description |
-|-----|-----|-----|
-| `$prefix` | `string` | the prefix |
-| `$handler` | `callable`, `null` | the callback to execute if the request matches the prefix |
-|  |  |  |
-| `return` | `self` |  |
 
 ---
 
@@ -352,6 +333,65 @@ public function exists (
 ---
 
 
+### vakata\router\Router::path
+Return the path of a given request with the base stripped off.  
+
+
+```php
+public function path (  
+    string $request  
+) : string    
+```
+
+|  | Type | Description |
+|-----|-----|-----|
+| `$request` | `string` | the request path to parse (optional, defaults to the current run, if router was run) |
+|  |  |  |
+| `return` | `string` | the parsed request path |
+
+---
+
+
+### vakata\router\Router::segments
+Get all the relevant segments from a path string.  
+
+
+```php
+public function segments (  
+    string $request  
+) : array    
+```
+
+|  | Type | Description |
+|-----|-----|-----|
+| `$request` | `string` | the full path (optional, defaults to the current run, if router was run) |
+|  |  |  |
+| `return` | `array` | the parsed segments |
+
+---
+
+
+### vakata\router\Router::segment
+Get a relevant path segment by index.  
+
+
+```php
+public function segment (  
+    int $i,  
+    string $request  
+) : string    
+```
+
+|  | Type | Description |
+|-----|-----|-----|
+| `$i` | `int` | the desired index |
+| `$request` | `string` | a full path (optional, defaults to the current run, if router was run) |
+|  |  |  |
+| `return` | `string` | the segment at that index or null |
+
+---
+
+
 ### vakata\router\Router::run
 Runs the router with the specified input, invokes the registered callbacks (if a match is found)  
 
@@ -359,7 +399,8 @@ Runs the router with the specified input, invokes the registered callbacks (if a
 ```php
 public function run (  
     string $request,  
-    string $verb  
+    string $verb,  
+    array $args  
 ) : mixed    
 ```
 
@@ -367,6 +408,7 @@ public function run (
 |-----|-----|-----|
 | `$request` | `string` | the path to check |
 | `$verb` | `string` | the HTTP verb to check (defaults to GET) |
+| `$args` | `array` | additional parameters to pass to all handlers |
 |  |  |  |
 | `return` | `mixed` | if a match is found the result of the callback is returned |
 

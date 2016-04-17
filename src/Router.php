@@ -11,6 +11,7 @@ class Router
     protected $routes = [];
     protected $prefix = '';
     protected $base = '';
+    protected $current = null;
 
     /**
      * Create an instance.
@@ -28,7 +29,7 @@ class Router
         }
     }
 
-    protected function compile($url, $full = true)
+    public function compile($url, $full = true)
     {
         $url = array_filter(
             explode('/', trim($url, '/')),
@@ -103,28 +104,6 @@ class Router
         );
 
         return $url;
-    }
-
-    /**
-     * Define a prefix for all routes added from now on.
-     *
-     * If is also possible to define an optional callback to execute if the request matches the prefix.
-     * @method with
-     * @param  string        $prefix  the prefix
-     * @param  callable|null $handler the callback to execute if the request matches the prefix
-     * @return self
-     */
-    public function with($prefix = '', callable $handler = null)
-    {
-        $prefix = trim($prefix, '/');
-        $this->prefix = $prefix.(strlen($prefix) ? '/' : '');
-        if (isset($handler)) {
-            if (!isset($this->preprocessors[$prefix])) {
-                $this->preprocessors[$prefix] = [];
-            }
-            $this->preprocessors[$prefix][] = $handler;
-        }
-        return $this;
     }
 
     /**
@@ -338,39 +317,64 @@ class Router
         return false;
     }
     /**
-     * Runs the router with the specified input, invokes the registered callbacks (if a match is found)
-     * @method run
-     * @param  string $request the path to check
-     * @param  string $verb    the HTTP verb to check (defaults to GET)
-     * @return mixed           if a match is found the result of the callback is returned
+     * Return the path of a given request with the base stripped off.
+     * @method path
+     * @param  string $request the request path to parse (optional, defaults to the current run, if router was run)
+     * @return string          the parsed request path
      */
-    public function run($request, $verb = 'GET')
+    public function path($request = null)
     {
-        if ($this->isEmpty()) {
-            throw new RouterNotFoundException('No valid routes', 500);
-        }
+        $request = $request ?: $this->current;
         $request = urldecode(trim($request, '/'));
         if ($this->base && strpos($request, $this->base) === 0) {
             $request = substr($request, strlen($this->base));
         }
         $request = str_replace('//', '/', '/'.$request.'/');
-        $matches = [];
-        foreach ($this->preprocessors as $route => $handlers) {
-            if (preg_match($this->compile($route, false), $request, $matches)) {
-                $arg = explode('/', trim($request, '/'));
-                $arg[-1] = $this->base();
-                foreach ($matches as $k => $v) {
-                    if (!is_int($k)) {
-                        $arg[$k] = trim($v, '/');
-                    }
-                }
-                foreach ($handlers as $handler) {
-                    if (call_user_func($handler, $arg) === false) {
-                        return false;
-                    }
-                }
-            }
+        return $request;
+    }
+    /**
+     * Get all the relevant segments from a path string.
+     * @method segments
+     * @param  string   $request the full path (optional, defaults to the current run, if router was run)
+     * @return array             the parsed segments
+     */
+    public function segments($request = null)
+    {
+        $request = $this->path($request);
+        return explode('/', trim($request, '/'));
+    }
+    /**
+     * Get a relevant path segment by index.
+     * @method segment
+     * @param  int     $i       the desired index
+     * @param  string  $request a full path (optional, defaults to the current run, if router was run)
+     * @return string           the segment at that index or null
+     */
+    public function segment($i, $request = null)
+    {
+        $request = $this->segments($request);
+        $i = (int)$i;
+        if ($i < 0) {
+            $i = count($request) + $i;
         }
+        return isset($request[$i]) ? $request[$i] : null;
+    }
+    /**
+     * Runs the router with the specified input, invokes the registered callbacks (if a match is found)
+     * @method run
+     * @param  string $request the path to check
+     * @param  string $verb    the HTTP verb to check (defaults to GET)
+     * @param  array  $args    additional parameters to pass to all handlers
+     * @return mixed           if a match is found the result of the callback is returned
+     */
+    public function run($request, $verb = 'GET', array $args = [])
+    {
+        if ($this->isEmpty()) {
+            throw new RouterNotFoundException('No valid routes', 500);
+        }
+        $this->current = $request;
+        $request = $this->path($request);
+        $matches = [];
         if (isset($this->routes[$verb])) {
             foreach ($this->routes[$verb] as $route => $handler) {
                 if (preg_match($this->compile($route), $request, $matches)) {
@@ -381,8 +385,8 @@ class Router
                             $arg[$k] = trim($v, '/');
                         }
                     }
-
-                    return call_user_func($handler, $arg);
+                    array_unshift($args, $arg);
+                    return call_user_func_array($handler, $args);
                 }
             }
         }
