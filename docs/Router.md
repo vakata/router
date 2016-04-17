@@ -6,6 +6,9 @@ A minimal routing class.
 | Name | Description |
 |------|-------------|
 |[__construct](#vakata\router\router__construct)|Create an instance.|
+|[compile](#vakata\router\routercompile)|Compile a rouoter formatted string to a regular expression. Used internally.|
+|[getPrefix](#vakata\router\routergetprefix)|Get the current prefix|
+|[setPrefix](#vakata\router\routersetprefix)|Set the prefix for all future URLs, used mainly internally.|
 |[group](#vakata\router\routergroup)|Group a few routes together (when sharing a common prefix)|
 |[add](#vakata\router\routeradd)|Add a route. All params are optional and each of them can be omitted independently.|
 |[get](#vakata\router\routerget)|Shortcut for add('GET', $url, $handler)|
@@ -43,6 +46,62 @@ public function __construct (
 |  | Type | Description |
 |-----|-----|-----|
 | `$base` | `string`, `boolean` | optional parameter indicating a common part of all the URLs that will be run |
+
+---
+
+
+### vakata\router\Router::compile
+Compile a rouoter formatted string to a regular expression. Used internally.  
+
+
+```php
+public function compile (  
+    string $url,  
+    boolean $full  
+) : string    
+```
+
+|  | Type | Description |
+|-----|-----|-----|
+| `$url` | `string` | the expression to compile |
+| `$full` | `boolean` | is the expression full (as opposed to open-ended partial), defaults to `true` |
+|  |  |  |
+| `return` | `string` | the regex |
+
+---
+
+
+### vakata\router\Router::getPrefix
+Get the current prefix  
+
+
+```php
+public function getPrefix () : string    
+```
+
+|  | Type | Description |
+|-----|-----|-----|
+|  |  |  |
+| `return` | `string` | $prefix the prefix |
+
+---
+
+
+### vakata\router\Router::setPrefix
+Set the prefix for all future URLs, used mainly internally.  
+
+
+```php
+public function setPrefix (  
+    string $prefix  
+) : self    
+```
+
+|  | Type | Description |
+|-----|-----|-----|
+| `$prefix` | `string` | the prefix to prepend |
+|  |  |  |
+| `return` | `self` |  |
 
 ---
 
