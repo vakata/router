@@ -131,17 +131,17 @@ class Router
      */
     public function add($method, $url = null, $handler = null)
     {
-        $args = func_get_args();
-        $handler = array_pop($args);
-        $url = array_pop($args);
-        $method = array_pop($args);
-
-        if (!$method &&
-            (is_array($url) || in_array($url, ['GET', 'HEAD', 'POST', 'PATCH', 'DELETE', 'PUT', 'OPTIONS', 'REPORT']))
-        ) {
-            $method = $url;
-            $url = null;
+        $temp = [ 'method' => [ 'GET', 'POST' ], 'url' => '', 'handler' => null ];
+        foreach (func_get_args() as $arg) {
+            if (is_callable($arg)) {
+                $temp['handler'] = $arg;
+            } else if (in_array($arg, ['GET', 'HEAD', 'POST', 'PATCH', 'DELETE', 'PUT', 'OPTIONS', 'REPORT'])) {
+                $temp['method'] = $arg;
+            } else {
+                $temp['url'] = $arg;
+            }
         }
+        list($method, $url, $handler) = array_values($temp);
 
         if (!$url && $this->prefix) {
             $url = $this->prefix;
@@ -299,7 +299,8 @@ class Router
      * @param  string $method  for which method to check (defaults to "GET")
      * @return boolean         would the URL match if it is ran
      */
-    public function exists($request, $method = 'GET') {
+    public function exists($request, $method = 'GET')
+    {
         $request = urldecode(trim(parse_url($request, PHP_URL_PATH), '/'));
         if ($this->base && strpos($request, $this->base) === 0) {
             $request = substr($request, strlen($this->base));
