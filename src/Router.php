@@ -298,7 +298,7 @@ class Router
      */
     public function base()
     {
-        return '/' . $this->base . '/';
+        return str_replace('//', '/', '/' . $this->base . '/');
     }
     /**
      * convert a router-relative path to a server absolute path
