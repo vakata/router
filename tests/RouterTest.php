@@ -16,7 +16,6 @@ class RouterTest extends \PHPUnit_Framework_TestCase
 
 	public function testCreate() {
 		self::$router = new \vakata\router\Router();
-		$this->assertEquals(true, self::$router->isEmpty());
 		self::$router
 			->get('/get', function () { return 1; })
 			->get('/get', function () { return 2; })
@@ -37,7 +36,6 @@ class RouterTest extends \PHPUnit_Framework_TestCase
 			->get('/types/{**}', function ($arg) { return $arg[2]; })
 			->get('/optional/{?i}', function ($arg) { return isset($arg[1]) ? $arg[1] : ''; })
 			->get('regex/{(asdf|zxcv)}', function () { return 14; });
-		$this->assertEquals(false, self::$router->isEmpty());
 	}
 	/**
 	 * @depends testCreate
@@ -74,7 +72,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase
 		self::$router->run('regex/qwer');
 	}
 	public function testBase() {
-		$router1 = new \vakata\router\Router('/asdf/');
+		$router1 = (new \vakata\router\Router())->setBase('/asdf/');
 		$router2 = new \vakata\router\Router();
 		$router1->get('test', function () { return 1; });
 		$router2->get('test', function () { return 1; });
@@ -101,16 +99,5 @@ class RouterTest extends \PHPUnit_Framework_TestCase
 
 		$this->setExpectedException('\vakata\router\RouterException');
 		$router1->run('prefix/a');
-	}
-	public function testParams() {
-		$router = new \vakata\router\Router();
-		$router->get('a', function ($matches, $a, $b) { return [$a, $b]; });
-		$this->assertEquals([1, 2], $router->run('a', 'GET', [1, 2]));
-	}
-	public function testHelpers() {
-		$router = new \vakata\router\Router();
-		$this->assertEquals([1, 2, 3], $router->segments('1/2/3'));
-		$this->assertEquals(3, $router->segment(-1, '1/2/3'));
-		$this->assertEquals(1, $router->segment(0, '1/2/3'));
 	}
 }

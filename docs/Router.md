@@ -5,8 +5,9 @@ A minimal routing class.
 
 | Name | Description |
 |------|-------------|
-|[__construct](#vakata\router\router__construct)|Create an instance.|
-|[compile](#vakata\router\routercompile)|Compile a rouoter formatted string to a regular expression. Used internally.|
+|[setBase](#vakata\router\routersetbase)|Set the router base (string that will be stripped if found at the beggining of the URL when running the router)|
+|[detectBase](#vakata\router\routerdetectbase)|Auteodetects the router's base (string that will be stripped if found at the beggining of any processed URL)|
+|[getBase](#vakata\router\routergetbase)|return the base part of the URL (that is not evaluated by the router)|
 |[getPrefix](#vakata\router\routergetprefix)|Get the current prefix|
 |[setPrefix](#vakata\router\routersetprefix)|Set the prefix for all future URLs, used mainly internally.|
 |[group](#vakata\router\routergroup)|Group a few routes together (when sharing a common prefix)|
@@ -19,54 +20,59 @@ A minimal routing class.
 |[patch](#vakata\router\routerpatch)|Shortcut for add('PATCH', $url, $handler)|
 |[delete](#vakata\router\routerdelete)|Shortcut for add('DELETE', $url, $handler)|
 |[options](#vakata\router\routeroptions)|Shortcut for add('OPTIONS', $url, $handler)|
-|[isEmpty](#vakata\router\routerisempty)|Are there any routes registered in the instances|
-|[base](#vakata\router\routerbase)|return the base part of the URL (that is not evaluated by the router)|
-|[url](#vakata\router\routerurl)|convert a router-relative path to a server absolute path|
-|[exists](#vakata\router\routerexists)|check if a URL would be matched by any routes in the router|
-|[path](#vakata\router\routerpath)|Return the path of a given request with the base stripped off.|
-|[segments](#vakata\router\routersegments)|Get all the relevant segments from a path string.|
-|[segment](#vakata\router\routersegment)|Get a relevant path segment by index.|
 |[run](#vakata\router\routerrun)|Runs the router with the specified input, invokes the registered callbacks (if a match is found)|
 
 ---
 
 
 
-### vakata\router\Router::__construct
-Create an instance.  
-You can specify the optional base parameter, that will be stripped if found at the begining of any URL.  
-If you set $base to `true` the router will try to autodetect its base.
+### vakata\router\Router::setBase
+Set the router base (string that will be stripped if found at the beggining of the URL when running the router)  
+
 
 ```php
-public function __construct (  
-    string|boolean $base  
-)   
+public function setBase (  
+    string $base  
+) : self    
 ```
 
 |  | Type | Description |
 |-----|-----|-----|
-| `$base` | `string`, `boolean` | optional parameter indicating a common part of all the URLs that will be run |
+| `$base` | `string` | the string to strip |
+|  |  |  |
+| `return` | `self` |  |
 
 ---
 
 
-### vakata\router\Router::compile
-Compile a rouoter formatted string to a regular expression. Used internally.  
+### vakata\router\Router::detectBase
+Auteodetects the router's base (string that will be stripped if found at the beggining of any processed URL)  
 
 
 ```php
-public function compile (  
-    string $url,  
-    boolean $full  
-) : string    
+public function detectBase () : self    
 ```
 
 |  | Type | Description |
 |-----|-----|-----|
-| `$url` | `string` | the expression to compile |
-| `$full` | `boolean` | is the expression full (as opposed to open-ended partial), defaults to `true` |
 |  |  |  |
-| `return` | `string` | the regex |
+| `return` | `self` |  |
+
+---
+
+
+### vakata\router\Router::getBase
+return the base part of the URL (that is not evaluated by the router)  
+
+
+```php
+public function getBase () : string    
+```
+
+|  | Type | Description |
+|-----|-----|-----|
+|  |  |  |
+| `return` | `string` | the base URL |
 
 ---
 
@@ -318,139 +324,6 @@ public function options (
 ---
 
 
-### vakata\router\Router::isEmpty
-Are there any routes registered in the instances  
-
-
-```php
-public function isEmpty () : boolean    
-```
-
-|  | Type | Description |
-|-----|-----|-----|
-|  |  |  |
-| `return` | `boolean` | `true` if there are no routes registered |
-
----
-
-
-### vakata\router\Router::base
-return the base part of the URL (that is not evaluated by the router)  
-
-
-```php
-public function base () : string    
-```
-
-|  | Type | Description |
-|-----|-----|-----|
-|  |  |  |
-| `return` | `string` | the base URL |
-
----
-
-
-### vakata\router\Router::url
-convert a router-relative path to a server absolute path  
-
-
-```php
-public function url (  
-    string $path,  
-    array $params  
-) : string    
-```
-
-|  | Type | Description |
-|-----|-----|-----|
-| `$path` | `string` | the path to convert (defaults to an empty string) |
-| `$params` | `array` | optional GET parameters to append |
-|  |  |  |
-| `return` | `string` | the server path |
-
----
-
-
-### vakata\router\Router::exists
-check if a URL would be matched by any routes in the router  
-
-
-```php
-public function exists (  
-    string $request,  
-    string $method  
-) : boolean    
-```
-
-|  | Type | Description |
-|-----|-----|-----|
-| `$request` | `string` | the URL to check |
-| `$method` | `string` | for which method to check (defaults to "GET") |
-|  |  |  |
-| `return` | `boolean` | would the URL match if it is ran |
-
----
-
-
-### vakata\router\Router::path
-Return the path of a given request with the base stripped off.  
-
-
-```php
-public function path (  
-    string $request  
-) : string    
-```
-
-|  | Type | Description |
-|-----|-----|-----|
-| `$request` | `string` | the request path to parse (optional, defaults to the current run, if router was run) |
-|  |  |  |
-| `return` | `string` | the parsed request path |
-
----
-
-
-### vakata\router\Router::segments
-Get all the relevant segments from a path string.  
-
-
-```php
-public function segments (  
-    string $request  
-) : array    
-```
-
-|  | Type | Description |
-|-----|-----|-----|
-| `$request` | `string` | the full path (optional, defaults to the current run, if router was run) |
-|  |  |  |
-| `return` | `array` | the parsed segments |
-
----
-
-
-### vakata\router\Router::segment
-Get a relevant path segment by index.  
-
-
-```php
-public function segment (  
-    int $i,  
-    string $request  
-) : string    
-```
-
-|  | Type | Description |
-|-----|-----|-----|
-| `$i` | `int` | the desired index |
-| `$request` | `string` | a full path (optional, defaults to the current run, if router was run) |
-|  |  |  |
-| `return` | `string` | the segment at that index or null |
-
----
-
-
 ### vakata\router\Router::run
 Runs the router with the specified input, invokes the registered callbacks (if a match is found)  
 
@@ -458,8 +331,7 @@ Runs the router with the specified input, invokes the registered callbacks (if a
 ```php
 public function run (  
     string $request,  
-    string $verb,  
-    array $args  
+    string $verb  
 ) : mixed    
 ```
 
@@ -467,7 +339,6 @@ public function run (
 |-----|-----|-----|
 | `$request` | `string` | the path to check |
 | `$verb` | `string` | the HTTP verb to check (defaults to GET) |
-| `$args` | `array` | additional parameters to pass to all handlers |
 |  |  |  |
 | `return` | `mixed` | if a match is found the result of the callback is returned |
 

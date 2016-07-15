@@ -5,37 +5,44 @@ namespace vakata\router;
 /**
  * A minimal routing class.
  */
-class Router
+class Router implements RouterInterface
 {
     protected $preprocessors = [];
     protected $routes = [];
     protected $prefix = '';
     protected $base = '';
-    protected $current = null;
 
     /**
-     * Create an instance.
-     * You can specify the optional base parameter, that will be stripped if found at the begining of any URL.
-     * If you set $base to `true` the router will try to autodetect its base.
-     * @method __construct
-     * @param  string|boolean      $base optional parameter indicating a common part of all the URLs that will be run
+     * Set the router base (string that will be stripped if found at the beggining of the URL when running the router)
+     * @method setBase
+     * @param  string  $base the string to strip
+     * @return  self
      */
-    public function __construct($base = '')
+    public function setBase(string $base) : RouterInterface
     {
-        if ($base === true) {
-            $this->base = trim(str_replace('\\', '/', dirname($_SERVER['PHP_SELF'])), '/');
-        } else {
-            $this->base = urldecode(trim((string)parse_url($base, PHP_URL_PATH), '/'));
-        }
+        $this->base = urldecode(trim((string)parse_url($base, PHP_URL_PATH), '/'));
+        return $this;
     }
     /**
-     * Compile a rouoter formatted string to a regular expression. Used internally.
-     * @method compile
-     * @param  string  $url  the expression to compile
-     * @param  boolean $full is the expression full (as opposed to open-ended partial), defaults to `true`
-     * @return string        the regex
+     * Auteodetects the router's base (string that will be stripped if found at the beggining of any processed URL)
+     * @method detectBase
+     * @return  self
      */
-    public function compile($url, $full = true)
+    public function detectBase() : RouterInterface
+    {
+        $this->base = trim(str_replace('\\', '/', dirname($_SERVER['PHP_SELF'])), '/');
+        return $this;
+    }
+    /**
+     * return the base part of the URL (that is not evaluated by the router)
+     * @method getBase
+     * @return string the base URL
+     */
+    public function getBase() : string
+    {
+        return str_replace('//', '/', '/' . $this->base . '/');
+    }
+    protected function compile(string $url, bool $full = true) : string
     {
         $url = array_filter(
             explode('/', trim($url, '/')),
@@ -53,7 +60,7 @@ class Router
 
         return $url;
     }
-    protected function compileSegment($url)
+    protected function compileSegment(string $url) : string
     {
         $all = preg_match('(^\{[^\}]+\}$)', $url);
         if (!preg_match('(([^{]*)\{([^}]+)\}([^{]*))i', $url)) {
@@ -116,7 +123,7 @@ class Router
      * @method getPrefix
      * @return string    $prefix the prefix
      */
-    public function getPrefix() {
+    public function getPrefix() : string {
         return $this->prefix;
     }
     /**
@@ -125,7 +132,7 @@ class Router
      * @param  string    $prefix the prefix to prepend
      * @return self
      */
-    public function setPrefix($prefix) {
+    public function setPrefix(string $prefix) : RouterInterface {
         $prefix = trim($prefix, '/');
         $this->prefix = $prefix.(strlen($prefix) ? '/' : '');
         return $this;
@@ -137,7 +144,7 @@ class Router
      * @param  callable $handler a function to add the actual routes from, receives the router object as parameter
      * @return self
      */
-    public function group($prefix, callable $handler) {
+    public function group(string $prefix, callable $handler) : RouterInterface {
         $this->setPrefix($prefix);
         $handler($this);
         $this->setPrefix('');
@@ -152,7 +159,7 @@ class Router
      * @param  callable     $handler the handler to execute when the route is matched
      * @return self
      */
-    public function add($method, $url = null, $handler = null)
+    public function add($method, $url = null, $handler = null) : RouterInterface
     {
         $temp = [ 'method' => [ 'GET', 'POST' ], 'url' => '', 'handler' => null ];
         foreach (func_get_args() as $arg) {
@@ -201,7 +208,7 @@ class Router
      * @param  callable $handler
      * @return self
      */
-    public function get($url, callable $handler)
+    public function get(string $url, callable $handler) : RouterInterface
     {
         return $this->add('GET', $url, $handler);
     }
@@ -212,7 +219,7 @@ class Router
      * @param  callable $handler
      * @return self
      */
-    public function report($url, callable $handler)
+    public function report(string $url, callable $handler) : RouterInterface
     {
         return $this->add('REPORT', $url, $handler);
     }
@@ -223,7 +230,7 @@ class Router
      * @param  callable $handler
      * @return self
      */
-    public function post($url, callable $handler)
+    public function post(string $url, callable $handler) : RouterInterface
     {
         return $this->add('POST', $url, $handler);
     }
@@ -234,7 +241,7 @@ class Router
      * @param  callable $handler
      * @return self
      */
-    public function head($url, callable $handler)
+    public function head(string $url, callable $handler) : RouterInterface
     {
         return $this->add('HEAD', $url, $handler);
     }
@@ -245,7 +252,7 @@ class Router
      * @param  callable $handler
      * @return self
      */
-    public function put($url, callable $handler)
+    public function put(string $url, callable $handler) : RouterInterface
     {
         return $this->add('PUT', $url, $handler);
     }
@@ -256,7 +263,7 @@ class Router
      * @param  callable $handler
      * @return self
      */
-    public function patch($url, callable $handler)
+    public function patch(string $url, callable $handler) : RouterInterface
     {
         return $this->add('PATCH', $url, $handler);
     }
@@ -267,7 +274,7 @@ class Router
      * @param  callable $handler
      * @return self
      */
-    public function delete($url, callable $handler)
+    public function delete(string $url, callable $handler) : RouterInterface
     {
         return $this->add('DELETE', $url, $handler);
     }
@@ -278,75 +285,12 @@ class Router
      * @param  callable $handler
      * @return self
      */
-    public function options($url, callable $handler)
+    public function options(string $url, callable $handler) : RouterInterface
     {
         return $this->add('OPTIONS', $url, $handler);
     }
-    /**
-     * Are there any routes registered in the instances
-     * @method isEmpty
-     * @return boolean `true` if there are no routes registered
-     */
-    public function isEmpty()
-    {
-        return count($this->routes) === 0;
-    }
-    /**
-     * return the base part of the URL (that is not evaluated by the router)
-     * @method base
-     * @return string the base URL
-     */
-    public function base()
-    {
-        return str_replace('//', '/', '/' . $this->base . '/');
-    }
-    /**
-     * convert a router-relative path to a server absolute path
-     * @method url
-     * @param  string $path   the path to convert (defaults to an empty string)
-     * @param  array  $params optional GET parameters to append
-     * @return string         the server path
-     */
-    public function url($path = '', $params = [])
-    {
-        $path = $this->base() . ltrim($path, '/');
-        if (count($params)) {
-            $path .= '?' . http_build_query($params);
-        }
-        return $path;
-    }
-    /**
-     * check if a URL would be matched by any routes in the router
-     * @method exists
-     * @param  string $request the URL to check
-     * @param  string $method  for which method to check (defaults to "GET")
-     * @return boolean         would the URL match if it is ran
-     */
-    public function exists($request, $method = 'GET')
-    {
-        $request = urldecode(trim(parse_url($request, PHP_URL_PATH), '/'));
-        if ($this->base && strpos($request, $this->base) === 0) {
-            $request = substr($request, strlen($this->base));
-        }
-        $request = str_replace('//', '/', '/'.$request.'/');
 
-        if (!isset($this->routes[$verb])) {
-            return false;
-        }
-        foreach ($this->routes[$verb] as $route => $handler) {
-            if (preg_match($this->compile($route), $request)) {
-                return true;
-            }
-        }
-        return false;
-    }
-    /**
-     * Return the path of a given request with the base stripped off.
-     * @method path
-     * @param  string $request the request path to parse (optional, defaults to the current run, if router was run)
-     * @return string          the parsed request path
-     */
-    public function path($request = null)
+    protected function path(string $request) : string
     {
         $request = $request ?: $this->current;
         $request = urldecode(trim($request, '/'));
@@ -356,61 +300,38 @@ class Router
         $request = str_replace('//', '/', '/'.$request.'/');
         return $request;
     }
-    /**
-     * Get all the relevant segments from a path string.
-     * @method segments
-     * @param  string   $request the full path (optional, defaults to the current run, if router was run)
-     * @return array             the parsed segments
-     */
-    public function segments($request = null)
+    protected function segments(string $request) : array
     {
         $request = $this->path($request);
-        return explode('/', trim($request, '/'));
-    }
-    /**
-     * Get a relevant path segment by index.
-     * @method segment
-     * @param  int     $i       the desired index
-     * @param  string  $request a full path (optional, defaults to the current run, if router was run)
-     * @return string           the segment at that index or null
-     */
-    public function segment($i, $request = null)
-    {
-        $request = $this->segments($request);
-        $i = (int)$i;
-        if ($i < 0) {
-            $i = count($request) + $i;
+        $arg = explode('/', trim($request, '/'));
+        $cnt = count($arg) * -1;
+        foreach (array_values($arg) as $k => $v) {
+            $arg[$cnt + $k] = $v;
         }
-        return isset($request[$i]) ? $request[$i] : null;
+        $arg['__base'] = $this->getBase();
+        return $arg;
     }
     /**
      * Runs the router with the specified input, invokes the registered callbacks (if a match is found)
      * @method run
      * @param  string $request the path to check
      * @param  string $verb    the HTTP verb to check (defaults to GET)
-     * @param  array  $args    additional parameters to pass to all handlers
      * @return mixed           if a match is found the result of the callback is returned
      */
-    public function run($request, $verb = 'GET', array $args = [])
+    public function run(string $request, string $verb = 'GET')
     {
-        if ($this->isEmpty()) {
-            throw new RouterNotFoundException('No valid routes', 500);
-        }
-        $this->current = $request;
         $request = $this->path($request);
         $matches = [];
         if (isset($this->routes[$verb])) {
             foreach ($this->routes[$verb] as $route => $handler) {
                 if (preg_match($this->compile($route), $request, $matches)) {
-                    $arg = explode('/', trim($request, '/'));
-                    $arg[-1] = $this->base();
+                    $segments = $this->segments($request);
                     foreach ($matches as $k => $v) {
                         if (!is_int($k)) {
-                            $arg[$k] = trim($v, '/');
+                            $segments[$k] = trim($v, '/');
                         }
                     }
-                    array_unshift($args, $arg);
-                    return call_user_func_array($handler, $args);
+                    return call_user_func($handler, $segments);
                 }
             }
         }

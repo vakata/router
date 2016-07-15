@@ -4,6 +4,8 @@ return (object)[
     'destDirectory' => 'docs',
     'format' => 'github',
     'classes' => [
-        '\\vakata\\router\\Router'
+        '\\vakata\\router\\Router',
+        '\\vakata\\router\\RouterException',
+        '\\vakata\\router\\RouterNotFoundException',
     ],
 ];
