@@ -308,7 +308,7 @@ class Router implements RouterInterface
         foreach (array_values($arg) as $k => $v) {
             $arg[$cnt + $k] = $v;
         }
-        $arg['__base'] = $this->getBase();
+        $arg['/'] = $this->getBase();
         return $arg;
     }
     /**
