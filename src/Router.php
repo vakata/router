@@ -309,6 +309,7 @@ class Router implements RouterInterface
             $arg[$cnt + $k] = $v;
         }
         $arg['/'] = $this->getBase();
+        $arg['.'] = $request;
         return $arg;
     }
     /**

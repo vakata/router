@@ -5,6 +5,7 @@ return (object)[
     'format' => 'github',
     'classes' => [
         '\\vakata\\router\\Router',
+        '\\vakata\\router\\RouterInterface',
         '\\vakata\\router\\RouterException',
         '\\vakata\\router\\RouterNotFoundException',
     ],
