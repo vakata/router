@@ -303,13 +303,13 @@ class Router implements RouterInterface
     protected function segments(string $request) : array
     {
         $request = $this->path($request);
-        $arg = explode('/', trim($request, '/'));
+        $arg = array_filter(explode('/', trim($request, '/')));
         $cnt = count($arg) * -1;
         foreach (array_values($arg) as $k => $v) {
             $arg[$cnt + $k] = $v;
         }
         $arg['/'] = $this->getBase();
-        $arg['.'] = $request;
+        $arg['.'] = trim($request, '/');
         return $arg;
     }
     /**
