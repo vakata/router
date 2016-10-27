@@ -14,7 +14,6 @@ class Router implements RouterInterface
 
     /**
      * Set the router base (string that will be stripped if found at the beggining of the URL when running the router)
-     * @method setBase
      * @param  string  $base the string to strip
      * @return  self
      */
@@ -25,7 +24,6 @@ class Router implements RouterInterface
     }
     /**
      * Auteodetects the router's base (string that will be stripped if found at the beggining of any processed URL)
-     * @method detectBase
      * @return  self
      */
     public function detectBase() : RouterInterface
@@ -35,7 +33,6 @@ class Router implements RouterInterface
     }
     /**
      * return the base part of the URL (that is not evaluated by the router)
-     * @method getBase
      * @return string the base URL
      */
     public function getBase() : string
@@ -120,7 +117,6 @@ class Router implements RouterInterface
     }
     /**
      * Get the current prefix
-     * @method getPrefix
      * @return string    $prefix the prefix
      */
     public function getPrefix() : string {
@@ -128,7 +124,6 @@ class Router implements RouterInterface
     }
     /**
      * Set the prefix for all future URLs, used mainly internally.
-     * @method setPrefix
      * @param  string    $prefix the prefix to prepend
      * @return self
      */
@@ -139,7 +134,6 @@ class Router implements RouterInterface
     }
     /**
      * Group a few routes together (when sharing a common prefix)
-     * @method group
      * @param  string   $prefix  the common prefix
      * @param  callable $handler a function to add the actual routes from, receives the router object as parameter
      * @return self
@@ -153,7 +147,6 @@ class Router implements RouterInterface
 
     /**
      * Add a route. All params are optional and each of them can be omitted independently.
-     * @method add
      * @param  array|string $method  HTTP verbs for which this route is valid
      * @param  string       $url     the route URL (check the usage docs for information on supported formats)
      * @param  callable     $handler the handler to execute when the route is matched
@@ -203,7 +196,6 @@ class Router implements RouterInterface
     }
     /**
      * Shortcut for add('GET', $url, $handler)
-     * @method get
      * @param  string   $url
      * @param  callable $handler
      * @return self
@@ -214,7 +206,6 @@ class Router implements RouterInterface
     }
     /**
      * Shortcut for add('REPORT', $url, $handler)
-     * @method report
      * @param  string   $url
      * @param  callable $handler
      * @return self
@@ -225,7 +216,6 @@ class Router implements RouterInterface
     }
     /**
      * Shortcut for add('POST', $url, $handler)
-     * @method post
      * @param  string   $url
      * @param  callable $handler
      * @return self
@@ -236,7 +226,6 @@ class Router implements RouterInterface
     }
     /**
      * Shortcut for add('HEAD', $url, $handler)
-     * @method head
      * @param  string   $url
      * @param  callable $handler
      * @return self
@@ -247,7 +236,6 @@ class Router implements RouterInterface
     }
     /**
      * Shortcut for add('PUT', $url, $handler)
-     * @method put
      * @param  string   $url
      * @param  callable $handler
      * @return self
@@ -258,7 +246,6 @@ class Router implements RouterInterface
     }
     /**
      * Shortcut for add('PATCH', $url, $handler)
-     * @method patch
      * @param  string   $url
      * @param  callable $handler
      * @return self
@@ -269,7 +256,6 @@ class Router implements RouterInterface
     }
     /**
      * Shortcut for add('DELETE', $url, $handler)
-     * @method delete
      * @param  string   $url
      * @param  callable $handler
      * @return self
@@ -280,7 +266,6 @@ class Router implements RouterInterface
     }
     /**
      * Shortcut for add('OPTIONS', $url, $handler)
-     * @method options
      * @param  string   $url
      * @param  callable $handler
      * @return self
@@ -314,7 +299,6 @@ class Router implements RouterInterface
     }
     /**
      * Runs the router with the specified input, invokes the registered callbacks (if a match is found)
-     * @method run
      * @param  string $request the path to check
      * @param  string $verb    the HTTP verb to check (defaults to GET)
      * @return mixed           if a match is found the result of the callback is returned
