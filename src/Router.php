@@ -277,7 +277,7 @@ class Router implements RouterInterface
 
     protected function path(string $request) : string
     {
-        $request = $request ?: $this->current;
+        //$request = $request ?: $this->current;
         $request = urldecode(trim($request, '/'));
         if ($this->base && strpos($request, $this->base) === 0) {
             $request = substr($request, strlen($this->base));
